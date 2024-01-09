@@ -13,6 +13,8 @@ from selenium.webdriver.common.keys import Keys
 from pathlib import Path
 from time import sleep
 
+if 'pagina_central' not in st.session_state:
+    st.session_state.pagina_central = 'home'
 
 def whats_bot(conteudo_template, conteudo_contatos):
     service = Service(ChromeDriverManager().install())
@@ -73,10 +75,6 @@ def whats_bot(conteudo_template, conteudo_contatos):
 PASTA_ATUAL = Path(__file__).parent
 PASTA_TEMPLATES = PASTA_ATUAL / 'templates'
 PASTA_CONTATOS = PASTA_ATUAL / 'contatos'
-
-
-if not 'pagina_central' in st.session_state:
-    st.session_state.pagina_central = 'home'
 
 def mudar_pagina(nome_pagina):
     st.session_state.pagina_central = nome_pagina
