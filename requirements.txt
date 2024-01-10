@@ -3,3 +3,4 @@ selenium
 pandas
 streamlit_extras
 streamlit
+openpyxl
