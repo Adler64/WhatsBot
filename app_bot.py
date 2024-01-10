@@ -1,6 +1,11 @@
 from pathlib import Path
 import streamlit as st
+from streamlit_extras.app_logo import add_logo
 import glob
+import time
+import base64
+import pandas as pd
+from datetime import datetime
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -16,7 +21,7 @@ from time import sleep
 if 'pagina_central' not in st.session_state:
     st.session_state.pagina_central = 'home'
 
-def whats_bot(conteudo_template, conteudo_contatos):
+def whats_bot(conteudo_template, conteudo_contatos, lista_selecionada):
     service = Service(ChromeDriverManager().install())
     driver = webdriver.Chrome(service=service)
 
@@ -76,6 +81,7 @@ PASTA_ATUAL = Path(__file__).parent
 PASTA_TEMPLATES = PASTA_ATUAL / 'templates'
 PASTA_CONTATOS = PASTA_ATUAL / 'contatos'
 
+
 def mudar_pagina(nome_pagina):
     st.session_state.pagina_central = nome_pagina
 
@@ -105,15 +111,15 @@ def pag_templates():
     st.divider()
 
     for arquivo in PASTA_TEMPLATES.glob('*.txt'):
+        with open(PASTA_TEMPLATES / arquivo, 'r') as f:
+            conteudo_template = f.read()
         nome_arquivo = arquivo.stem.replace('_',  '').upper()
         col1, col2= st.columns([0.6, 0.4])
 
-        col1.button(nome_arquivo, key = f'{nome_arquivo}', use_container_width= True,
-                               on_click = mudar_pagina,
-                               args = ("visualizar_template"))
+        col1.text_area(nome_arquivo, key = f'{nome_arquivo}', value = conteudo_template, height= 200)
         col2.button('Remover', key = f'remover_{nome_arquivo}', use_container_width= True,
                                on_click = remove_template,
-                               args = (nome_arquivo))
+                               args = (nome_arquivo, ))
 
     st.divider()
     st.button('Adicionar Template', on_click = mudar_pagina, args = ('adicionar_novo_template', ))
@@ -182,6 +188,14 @@ def excluir_contatos(lista, contatos, lista_original):
         for item in updated_list:
             file.write(item + ',\n') 
 
+##### HISTÓRICO #####
+def historico_envios():
+    st.title("Histórico de Envios")
+    st.divider()
+
+    historico = pd.read_excel(PASTA_ATUAL / 'historico.xlsx')
+    st.dataframe(historico, use_container_width= True)
+
 ##### ENVIO #####
 def realizar_envio():
     st.title("Envio em Massa")
@@ -189,7 +203,6 @@ def realizar_envio():
 
     arquivos_template = [file.name for file in PASTA_TEMPLATES.glob("*.txt")]
     template_selecionado = st.selectbox("Selecione o Template para envio em massa.", arquivos_template)
-    PASTA_TEMPLATES.mkdir(exist_ok= True)
     with open(PASTA_TEMPLATES / template_selecionado, 'r') as f:
         conteudo_template = f.read()
         st.text_area("Counteúdo do Template", conteudo_template, height= 200)
@@ -205,12 +218,35 @@ def realizar_envio():
         conteudo_contatos = list(filter(None, conteudo_contatos))
 
     st.divider()
-    st.button("Enviar", use_container_width = True, on_click = whats_bot, args = (conteudo_template, conteudo_contatos))
+
+    if st.button("Enviar", use_container_width = True, on_click = whats_bot, args = (conteudo_template, conteudo_contatos, lista_selecionada)):
+        st.success("Envio Concluído!")
+        st.balloons()
+        data = datetime.now().strftime("%d/%m/%Y")
+        hora = datetime.now().strftime("%H:%M:%S")
+        df = pd.DataFrame({'Data do Envio': [data], 'Hora de Envio': [hora], 'Template': [template_selecionado], 'Lista' : [lista_selecionada]})
+
+        historico = pd.read_excel(PASTA_ATUAL / 'historico.xlsx')
+        historico = pd.concat([historico, df], ignore_index=True)    
+        historico.to_excel(PASTA_ATUAL / 'historico.xlsx', index=False)
 
 def main():
+    with open(PASTA_ATUAL / 'logo.png', 'rb') as f:
+        data = base64.b64encode(f.read()).decode("utf-8")
+        st.sidebar.markdown(
+            f"""
+            <div style="display:table;margin-top:-20%;margin-left:23%;">
+                <img src="data:image/png;base64,{data}" width="150" height="150">
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )   
+
+    st.sidebar.divider()
     st.sidebar.button("Central de Mensagens", use_container_width= True, on_click= mudar_pagina, args = ('home',))
     st.sidebar.button("Gerenciar Templates", use_container_width= True, on_click= mudar_pagina, args = ('templates',))
     st.sidebar.button("Gerenciar Contatos", use_container_width= True, on_click = mudar_pagina, args = ('contatos', ))
+    st.sidebar.button("Historico de Envio", use_container_width= True, on_click = mudar_pagina, args = ('historico_envios', ))
 
     if st.session_state.pagina_central == 'home':
         home()
@@ -226,5 +262,7 @@ def main():
         pag_novo_contato()
     elif st.session_state.pagina_central == 'verificar_contatos':
         verificar_contatos()
+    elif st.session_state.pagina_central == 'historico_envios':
+        historico_envios()
 
 main()
