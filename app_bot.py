@@ -20,7 +20,7 @@ from time import sleep
 
 if 'pagina_central' not in st.session_state:
     st.session_state.pagina_central = 'home'
-stre
+
 def whats_bot(conteudo_template, conteudo_contatos, lista_selecionada):
     service = Service(ChromeDriverManager().install())
     driver = webdriver.Chrome(service=service)
