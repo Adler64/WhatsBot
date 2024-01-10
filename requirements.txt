@@ -1,6 +1,5 @@
 webdriver_manager
 selenium
-time
 base64
 pandas
 streamlit_extras
