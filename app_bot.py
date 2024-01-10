@@ -196,7 +196,6 @@ def realizar_envio():
 
     arquivos_lista = [file.name for file in PASTA_CONTATOS.glob("*.txt")]
     lista_selecionada = st.selectbox("Selecione a lista de contatos para envio em massa.", arquivos_lista)
-    PASTA_CONTATOS.mkdir(exist_ok= True)
     with open(PASTA_CONTATOS / lista_selecionada, 'r') as f:
         contatos = list()
         for line in f:
