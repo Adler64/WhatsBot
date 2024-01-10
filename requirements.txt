@@ -1,5 +1,4 @@
 webdriver_manager
-selenium
 pandas
 streamlit_extras
 streamlit
