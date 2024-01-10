@@ -9,6 +9,7 @@ from datetime import datetime
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -21,8 +22,9 @@ if 'pagina_central' not in st.session_state:
     st.session_state.pagina_central = 'home'
 
 def whats_bot(conteudo_template, conteudo_contatos, lista_selecionada):
+    chrome_options = Options()
     service = Service(ChromeDriverManager().install())
-    driver = webdriver.Chrome(service=service)
+    driver = webdriver.Chrome(service=service, options = chrome_options)
 
     def abrir_janela_whatsapp():
         driver.get("https://web.whatsapp.com/")
