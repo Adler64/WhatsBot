@@ -22,9 +22,16 @@ if 'pagina_central' not in st.session_state:
     st.session_state.pagina_central = 'home'
 
 def whats_bot(conteudo_template, conteudo_contatos, lista_selecionada):
-    chrome_options = Options()
+    options = Options()
+    options.add_argument("--headless")
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--disable-gpu")
+    options.add_argument("--disable-features=NetworkService")
+    options.add_argument("--window-size=1920x1080")
+    options.add_argument("--disable-features=VizDisplayCompositor")
     service = Service(ChromeDriverManager().install())
-    driver = webdriver.Chrome(service=service, options = chrome_options)
+    driver = webdriver.Chrome(service=service, options = options)
 
     def abrir_janela_whatsapp():
         driver.get("https://web.whatsapp.com/")
