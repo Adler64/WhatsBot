@@ -14,12 +14,17 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
+import os
 
 from pathlib import Path
 from time import sleep
 
 if 'pagina_central' not in st.session_state:
     st.session_state.pagina_central = 'home'
+
+def installff():
+  os.system('sbase install geckodriver')
+  os.system('ln -s /home/appuser/venv/lib/python3.7/site-packages/seleniumbase/drivers/geckodriver /home/appuser/venv/bin/geckodriver')
 
 def whats_bot(conteudo_template, conteudo_contatos, lista_selecionada):
     options = Options()
